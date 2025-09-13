@@ -28,17 +28,15 @@ export function ScrollWheelHorizontal({
   const ref = useRef<HTMLDivElement>(null);
   const pad = useMemo(() => `calc(50vw - ${itemWidth / 2}px)`, [itemWidth]);
 
-  // center the bar on the current section
+  // center the bar on the current section when it changes
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-
     const idx = Math.max(0, ITEMS.findIndex((i) => i.key === section));
-    const x = idx * itemWidth;
-    el.scrollTo({ left: x, behavior: "auto" });
+    el.scrollTo({ left: idx * itemWidth, behavior: "auto" });
   }, [section, itemWidth]);
 
-  // choose the centered section after scroll
+  // detect which section is in the middle after scroll
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -79,14 +77,20 @@ export function ScrollWheelHorizontal({
 
   return (
     <div
-      className={`${
-        fixed ? "fixed" : "static"
-      } bottom-0 left-0 right-0 z-50 bg-neutral-950/90 backdrop-blur`}
+      style={{
+        position: fixed ? "fixed" : "static",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        overflow: "hidden",
+      }}
     >
       <div
         ref={ref}
-        className="flex overflow-x-auto overflow-y-hidden no-scrollbar"
         style={{
+          display: "flex",
+          overflowX: "auto",
+          overflowY: "hidden",
           WebkitOverflowScrolling: "touch",
           scrollSnapType: "x mandatory",
           paddingLeft: pad,
@@ -97,26 +101,17 @@ export function ScrollWheelHorizontal({
           <div
             key={it.key}
             data-wheel-item="1"
-            style={{ flex: `0 0 ${itemWidth}px`, scrollSnapAlign: "center" }}
-            className={`text-center uppercase whitespace-nowrap ${
-              section === it.key
-                ? "text-indigo-300 font-extrabold text-sm"
-                : "text-neutral-400/70 font-semibold text-xs"
-            }`}
+            style={{
+              flex: `0 0 ${itemWidth}px`,
+              scrollSnapAlign: "center",
+              textAlign: "center",
+              whiteSpace: "nowrap",
+            }}
           >
-            {it.label}
+            {section === it.key ? `> ${it.label}` : it.label}
           </div>
         ))}
       </div>
-      <style jsx global>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
-        }
-      `}</style>
     </div>
   );
 }
