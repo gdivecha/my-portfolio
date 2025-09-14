@@ -32,7 +32,7 @@ function IconLinkedIn(props: React.SVGProps<SVGSVGElement>) {
 
 export default function LeftPanel() {
   return (
-    <div className="grid h-full place-content-center">
+    <div className="grid h-full place-content-center mx-50">
       <div>
         {/* Header */}
         <header>
@@ -43,26 +43,27 @@ export default function LeftPanel() {
               bg-clip-text text-transparent 
               animate-gradient 
               bg-[length:200%_200%]
+              mb-12
             "
           >
             Gaurav Divecha
           </h1>
-          <p className="text-2xl text-highlights font-thin">
+          <p className="text-2xl text-highlights font-thin my-4">
             Software Engineer ◦ Artist ◦ Content Creator
           </p>
-          <p className="text-xl text-portfolioDescription font-thin">
+          <p className="text-xl text-portfolioDescription font-thin mb-10">
             I design and build efficient, user-focused solutions across web,
             cloud, and software systems, creating impactful digital experiences.
           </p>
         </header>
 
         {/* Dial */}
-        <div className="my-6">
+        <div className="my-12">
           <ScrollWheel />
         </div>
 
         {/* Contact Buttons */}
-        <div className="mt-6 flex gap-4">
+        <div className="mt-12 flex gap-4">
           {/* GitHub */}
           <a
             href="https://github.com/gdivecha"
