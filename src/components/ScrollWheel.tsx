@@ -10,15 +10,18 @@ const BASE: { key: SectionKey; label: string }[] = [
   { key: "recommendations", label: "RECOMMENDATIONS" },
   { key: "portfolio",       label: "PORTFOLIO" },
   { key: "bonus",           label: "BONUS" },
-  // add "contact" here if/when you include it in SectionKey + SectionRenderer
   { key: "about",           label: "ABOUT" },
   { key: "skills",          label: "SKILLS" },
   { key: "experience",      label: "EXPERIENCE" },
 ];
 
-const WINDOW = 9;                // odd -> single center
+const WINDOW = 9;                 
 const HALF = Math.floor(WINDOW / 2);
-const ROW_H = 32;                // px per row
+const ROW_H = 32;                 
+
+// Tick colors
+const ACTIVE_TICK   = "#C4C9FF";  // active section
+const INACTIVE_TICK = "#15151B";  // all other sections
 
 export function ScrollWheel() {
   const section = useUI((s) => s.section);
@@ -34,7 +37,6 @@ export function ScrollWheel() {
     [section]
   );
 
-  // Build 9 visible rows centered on current
   const items = useMemo(() => {
     const out: { key: SectionKey; label: string; offset: number }[] = [];
     for (let off = -HALF; off <= HALF; off++) {
@@ -44,15 +46,13 @@ export function ScrollWheel() {
     return out;
   }, [baseIndex]);
 
-  // Distance-based styling (center brightest)
   const styleForOffset = (offset: number) => {
     const d = Math.abs(offset);
-    const opacity = Math.max(0.3, 1 - d * 0.18);  // softer fade
+    const opacity = Math.max(0.3, 1 - d * 0.18);
     const scale   = Math.max(0.96, 1 - d * 0.015);
     return { opacity, scale };
   };
 
-  // Debounced wheel (one step per gesture)
   const accumRef = useRef(0);
   const lockedRef = useRef(false);
   const WHEEL_THRESHOLD = 40;
@@ -81,46 +81,57 @@ export function ScrollWheel() {
   };
 
   const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
-    if (e.key === "ArrowUp") { e.preventDefault(); stepBy(-1); }
+    if (e.key === "ArrowUp")   { e.preventDefault(); stepBy(-1); }
     if (e.key === "ArrowDown") { e.preventDefault(); stepBy(1); }
   };
 
   return (
     <div className="relative" aria-label="Section wheel">
-      {/* Left rail with dashed slots */}
+      {/* Rail */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-[22px]"
+        className="absolute left-0 top-0 bottom-0 w-[22px] rounded-md"
         style={{
-            background: `
+          background: `
             linear-gradient(
-                to bottom,
-                #15171B 0%,      /* dark top */
-                #25263C 25%,     /* softer dark */
-                #303151 50%,     /* highlight middle */
-                #25263C 75%,     /* softer dark */
-                #15171B 100%     /* dark bottom */
-            ),
-            repeating-linear-gradient(
-                180deg,
-                transparent 0 10px,
-                transparent 10px,
-                rgba(255,255,255,0.08) 12px,
-                transparent 26px
+              to bottom,
+              #15171B 0%,
+              #25263C 25%,
+              #303151 50%,
+              #25263C 75%,
+              #15171B 100%
             )
-            `,
-            boxShadow: "inset 0 0 0 0px rgba(99,102,241,.08)",
+          `,
         }}
-      />      
-     {/* Center tick */}
-      <div
-        aria-hidden
-        className="absolute left-0 right-0 pointer-events-none"
-        style={{ top: HALF * ROW_H, height: ROW_H }}
       >
-        <div className="absolute left-[4px] w-[14px] h-[4px] rounded-full bg-[#C4C9FF] translate-y-[12px]" />
+        {/* One tick per row */}
+        {items.map(({ key, offset }) => {
+          const isCenter = offset === 0;
+
+          const width  = 14;
+          const height = 3;
+          const color  = isCenter ? ACTIVE_TICK : INACTIVE_TICK;
+
+          const top = (HALF + offset) * ROW_H + (ROW_H - height) / 2;
+
+          return (
+            <div
+              key={`tick-${key}-${offset}`}
+              aria-hidden
+              style={{
+                position: "absolute",
+                left: 4,
+                top,
+                width,
+                height,
+                borderRadius: 9999,
+                backgroundColor: color,
+              }}
+            />
+          );
+        })}
       </div>
 
-      {/* List */}
+      {/* List of section labels */}
       <div
         role="listbox"
         aria-activedescendant={`wheel-${section}`}
@@ -133,7 +144,6 @@ export function ScrollWheel() {
           overflow: "hidden",
           userSelect: "none",
           lineHeight: `${ROW_H}px`,
-          // top/bottom vignette
           maskImage:
             "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)",
           WebkitMaskImage:
@@ -141,35 +151,32 @@ export function ScrollWheel() {
         }}
       >
         {items.map(({ key, label, offset }) => {
-        const isCenter = offset === 0;
-        const { opacity, scale } = styleForOffset(offset);
-
-        return (
+          const isCenter = offset === 0;
+          const { opacity, scale } = styleForOffset(offset);
+          return (
             <div
-            key={`${key}-${offset}`}
-            id={`wheel-${key}`}
-            role="option"
-            aria-selected={isCenter}
-            onClick={() => !isCenter && stepBy(offset)}
-            className={[
+              key={`${key}-${offset}`}
+              id={`wheel-${key}`}
+              role="option"
+              aria-selected={isCenter}
+              onClick={() => !isCenter && stepBy(offset)}
+              className={[
                 "uppercase",
                 isCenter
-                // ACTIVE row: Jost (or your sans), extra bold, accent color
-                ? "[font-family:var(--font-sans)] font-extrabold text-[#C4C9FF]"
-                // INACTIVE rows: mono (or alt), lighter weight, dimmer color
-                : "[font-family:var(--font-mono)] font-light text-portfolioDescription",
-            ].join(" ")}
-            style={{
+                  ? "[font-family:var(--font-sans)] font-extrabold text-[#C4C9FF]"
+                  : "[font-family:var(--font-mono)] font-light text-portfolioDescription",
+              ].join(" ")}
+              style={{
                 height: ROW_H,
                 transformOrigin: "left center",
                 transform: `scale(${scale})`,
                 opacity,
                 cursor: isCenter ? "default" : "pointer",
-            }}
+              }}
             >
-            {label}
+              {label}
             </div>
-        );
+          );
         })}
       </div>
     </div>
