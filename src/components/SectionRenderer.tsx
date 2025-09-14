@@ -1,6 +1,13 @@
 "use client";
+
 import { AnimatePresence, motion } from "framer-motion";
-import { useUI } from "@/store/ui";
+import { useUI, type SectionKey } from "@/store/ui";
+
+/**
+ * IMPORTANT: The imports below MUST match how each section file exports.
+ * - If your section files use `export default`, import without braces.
+ * - If they use `export const Name`, import with braces.
+ */
 import { Portfolio } from "@/components/sections/Portfolio";
 import { Bonus } from "@/components/sections/Bonus";
 import { About } from "@/components/sections/About";
@@ -11,21 +18,26 @@ import { OpenSource } from "@/components/sections/OpenSource";
 import { Certifications } from "@/components/sections/Certifications";
 import { Recommendations } from "@/components/sections/Recommendations";
 
-const MAP = {
-  "portfolio":       Portfolio,
-  "bonus":           Bonus,
-  "about":           About,
-  "skills":          Skills,
-  "experience":      Experience,
-  "projects":        Projects,
-  "open-source":     OpenSource,
-  "certifications":  Certifications,
-  "recommendations": Recommendations,
-} as const;
+/** Simple fallback so we never render `undefined` */
+const Fallback = () => null;
+
+/** Exhaustive, type-safe registry */
+const REGISTRY = {
+  portfolio:       Portfolio,
+  bonus:           Bonus,
+  about:           About,
+  skills:          Skills,
+  experience:      Experience,
+  projects:        Projects,
+  "open-source":   OpenSource,
+  certifications:  Certifications,
+  recommendations: Recommendations,
+} satisfies Record<SectionKey, React.ComponentType>;
 
 export function SectionRenderer() {
   const section = useUI((s) => s.section);
-  const Comp = MAP[section];
+  const Comp = REGISTRY[section] ?? Fallback;
+
   return (
     <AnimatePresence mode="wait">
       <motion.div

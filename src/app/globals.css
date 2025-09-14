@@ -10,7 +10,12 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* 👇 Your custom brand color */
+  --color-highlights: #C4C9FF;
+  --color-portfolioDescription: #616297;
 }
+
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -19,4 +24,18 @@
   }
 }
 
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
 
+.animate-gradient {
+  animation: gradient-flow 5s ease infinite;
+}
