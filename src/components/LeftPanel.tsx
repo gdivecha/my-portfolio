@@ -63,15 +63,15 @@ export default function LeftPanel() {
         </div>
 
         {/* Contact Buttons */}
-        <div className="mt-12 flex gap-4">
+        <div className="mt-65 flex gap-4">
           {/* GitHub */}
           <a
             href="https://github.com/gdivecha"
             target="_blank"
             rel="noreferrer"
-            className="grid h-12 w-12 place-items-center rounded-full bg-[#575696] text-black hover:opacity-80 transition"
+            className="grid h-20 w-20 place-items-center rounded-full bg-[#575696] text-black hover:opacity-80 transition"
           >
-            <IconGitHub className="h-8 w-8" />
+            <IconGitHub className="h-13 w-13" />
           </a>
 
           {/* LinkedIn */}
@@ -79,9 +79,9 @@ export default function LeftPanel() {
             href="https://linkedin.com/in/gauravcdivecha"
             target="_blank"
             rel="noreferrer"
-            className="grid h-12 w-12 place-items-center rounded-full bg-[#575696] text-black hover:opacity-80 transition"
+            className="grid h-20 w-20 place-items-center rounded-full bg-[#575696] text-black hover:opacity-80 transition"
           >
-            <IconLinkedIn />
+            <IconLinkedIn className="h-10 w-10" />
           </a>
         </div>
       </div>

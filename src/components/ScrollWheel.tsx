@@ -15,13 +15,19 @@ const BASE: { key: SectionKey; label: string }[] = [
   { key: "experience",      label: "EXPERIENCE" },
 ];
 
-const WINDOW = 9;                 
+const WINDOW = 9;                 // odd -> single center
 const HALF = Math.floor(WINDOW / 2);
-const ROW_H = 32;                 
+const ROW_H = 32;                 // px per row
 
 // Tick colors
 const ACTIVE_TICK   = "#C4C9FF";  // active section
 const INACTIVE_TICK = "#15151B";  // all other sections
+
+// Tick geometry + fine tuning
+const TICK_W = 14;
+const TICK_H = 3;
+const TICK_X = 4;        // left offset (px)
+const TICK_NUDGE = -1;   // -1 moves up 1px, 0 none, +1 moves down 1px
 
 export function ScrollWheel() {
   const section = useUI((s) => s.section);
@@ -37,6 +43,7 @@ export function ScrollWheel() {
     [section]
   );
 
+  // Build the 9 visible rows centered on current
   const items = useMemo(() => {
     const out: { key: SectionKey; label: string; offset: number }[] = [];
     for (let off = -HALF; off <= HALF; off++) {
@@ -46,13 +53,15 @@ export function ScrollWheel() {
     return out;
   }, [baseIndex]);
 
+  // Distance-based styling for labels
   const styleForOffset = (offset: number) => {
     const d = Math.abs(offset);
-    const opacity = Math.max(0.3, 1 - d * 0.18);
+    const opacity = Math.max(0.3, 1 - d * 0.18);  // softer fade
     const scale   = Math.max(0.96, 1 - d * 0.015);
     return { opacity, scale };
   };
 
+  // Wheel: one step per gesture
   const accumRef = useRef(0);
   const lockedRef = useRef(false);
   const WHEEL_THRESHOLD = 40;
@@ -87,7 +96,7 @@ export function ScrollWheel() {
 
   return (
     <div className="relative" aria-label="Section wheel">
-      {/* Rail */}
+      {/* Rail with vertical gradient */}
       <div
         className="absolute left-0 top-0 bottom-0 w-[22px] rounded-md"
         style={{
@@ -103,28 +112,27 @@ export function ScrollWheel() {
           `,
         }}
       >
-        {/* One tick per row */}
-        {items.map(({ key, offset }) => {
+        {/* One tick per row, centered with translateY(-50%) */}
+        {items.map(({ key, offset }, i) => {
           const isCenter = offset === 0;
-
-          const width  = 14;
-          const height = 3;
           const color  = isCenter ? ACTIVE_TICK : INACTIVE_TICK;
 
-          const top = (HALF + offset) * ROW_H + (ROW_H - height) / 2;
+          // Middle of the row: add 0.5 row, then translateY(-50%) for perfect centering
+          const rowMid = (HALF + offset + 0.5) * ROW_H;
 
           return (
             <div
-              key={`tick-${key}-${offset}`}
+              key={`tick-${key}-${i}`}
               aria-hidden
               style={{
                 position: "absolute",
-                left: 4,
-                top,
-                width,
-                height,
+                left: TICK_X,
+                top: rowMid + TICK_NUDGE,
+                width: TICK_W,
+                height: TICK_H,
                 borderRadius: 9999,
                 backgroundColor: color,
+                transform: "translateY(-50%)",
               }}
             />
           );
